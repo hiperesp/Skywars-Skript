@@ -1,0 +1,869 @@
+﻿options:
+	pronta:                   true
+	lobby:                    lobby #world do lobby, digite /spawnpoint no spawn do lobby
+	
+	tempo-da-partida:         900 #900
+	tempo-de-eventos:         300 #300
+	tempo-do-lobbywait:       60  #60
+	tempo-do-lobbywait-cheio: 10  #10
+	tempo-da-comemoracao:     10  #10
+	
+	min-players:              2   #2
+	
+	PLAYER-DISPLAYNAME: %coloured {_player}'s prefix%&7%{_player}%
+	VICTIM-DISPLAYNAME: %coloured {_victim}'s prefix%&7%{_victim}%
+	ATTACKER-DISPLAYNAME: %coloured {_attacker}'s prefix%&7%{_attacker}%
+	PREFIX: &9Skywars>&7
+	
+	WIN-MONEY:                30  #30
+	KILL-MONEY:               5   #5
+	
+	minigame:                 SW  #SW
+	
+	arena:                    3   #ID DA ARENA, SEM ESPAÇOS, DEVE SER DIFERENTE DE TODOS OS OUTROS
+	mundo:                    SWmap-03
+	
+	MODO-var:                    insano #TIPOS DE BAÚS (TUDO MINÚSCULO)
+	MODO-tx1:                    Insano #TIPOS DE BAÚS (SOMENTE PRIMEIRA LETRA MAIÚSCULO)
+	MODO-tx2:                    INSANO #TIPOS DE BAÚS (TUDO MAIÚSCULO)
+	
+	nome-do-mapa:  Candyland
+	autor-do-mapa: sportyman56
+	
+	LOBBYWAIT: 0.5, 242.5, 0.5
+	
+	SPAWN-01: 25.5, 89.5, 43.5
+	SPAWN-02: -0.5, 89.5, 51.5
+	SPAWN-03: -25.5, 89.5, 43.5
+	SPAWN-04: -44.5, 89.5, 25.5
+	SPAWN-05: -50.5, 89.5, 0.5
+	SPAWN-06: -44.5, 89.5, -25.5
+	SPAWN-07: -26.5, 89.5, -44.5
+	SPAWN-08: -1.5, 89.5, -50.5
+	SPAWN-09: 24.5, 89.5, -43.5
+	SPAWN-10: 43.5, 89.5, -26.5
+	SPAWN-11: 50.5, 89.5, -1.5
+	SPAWN-12: 43.5, 89.5, 24.5
+	
+	POS-1: -75.5, 0, 75.5
+	POS-2: 75.5, 256, -75.5
+	
+	FEAST-1: 15, 256, -15
+	FEAST-2: -15, 0, 15
+	
+	ANTILAG: 1
+	
+
+on place of a chest:
+	if "%player's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} = "iniciou":
+			cancel event
+			send "{@PREFIX} &7Quer aproveitar um refill né? Desista."
+
+on chat:
+	if "%player's world%" is "{@mundo}":
+		cancel event
+		set {_ingame} to 0
+		loop {{@minigame}{@arena}.jogadores::*}:
+			if "%loop-value%" is "%player%":
+				set {_ingame} to 1
+		if player has permission "vipplus.vipplus":
+			set message to coloured message
+		set {_player} to player
+		if {_ingame} = 1:
+			broadcast "&7{@PLAYER-DISPLAYNAME}&8: &r%message%" to "{@mundo}"
+		else:
+			broadcast "&7[ESPECTADOR] {@PLAYER-DISPLAYNAME}&8: &r%message%" to "{@mundo}"
+
+on load:
+	set {{@minigame}{@arena}.tipo} to "{@MODO-var}"
+	set {{@minigame}{@arena}.nome-do-mapa} to "{@nome-do-mapa}"
+	set {{@minigame}{@arena}.autor-do-mapa} to "{@autor-do-mapa}"
+	delete {{@minigame}{@arena}.iniciou}
+	delete {{@minigame}{@arena}.jogadores::*}
+	delete {{@minigame}{@arena}.tempoinicio}
+	delete {{@minigame}{@arena}.tempocage}
+	delete {{@minigame}{@arena}.eventonome}
+	delete {{@minigame}{@arena}.eventotempo}
+	delete {{@minigame}{@arena}.tempoevt}
+	delete {{@minigame}{@arena}.tempovencedor}
+	delete {{@minigame}{@arena}.evt}
+	delete {{@minigame}{@arena}.cagedamage}
+	delete {{@minigame}{@arena}.premio}
+	add ball large to {{@minigame}{@arena}.fireworktype::*}
+	add creeper to {{@minigame}{@arena}.fireworktype::*}
+	add ball to {{@minigame}{@arena}.fireworktype::*}
+	add star to {{@minigame}{@arena}.fireworktype::*}
+	add burst to {{@minigame}{@arena}.fireworktype::*}
+	add dark blue to {{@minigame}{@arena}.color::*}
+	add green to {{@minigame}{@arena}.color::*}
+	add dark aqua to {{@minigame}{@arena}.color::*}
+	add dark red to {{@minigame}{@arena}.color::*}
+	add purple to {{@minigame}{@arena}.color::*}
+	add gold to {{@minigame}{@arena}.color::*}
+	add blue to {{@minigame}{@arena}.color::*}
+	add lime to {{@minigame}{@arena}.color::*}
+	add aqua to {{@minigame}{@arena}.color::*}
+	add red to {{@minigame}{@arena}.color::*}
+	add pink to {{@minigame}{@arena}.color::*}
+	add yellow to {{@minigame}{@arena}.color::*}
+	wait 1 tick
+	set {{@minigame}{@arena}.iniciou} to "resetando"
+	if {@pronta} is not false:
+		execute console command "{@minigame}{@arena}resetar"
+	wait 30 seconds
+	add "{@minigame}{@arena}" to {hiperland.minigames::*}
+
+on unload:
+	delete {{@minigame}{@arena}.iniciou}
+	delete {{@minigame}{@arena}.jogadores::*}
+	delete {{@minigame}{@arena}.tempoinicio}
+	delete {{@minigame}{@arena}.tempocage}
+	delete {{@minigame}{@arena}.eventonome}
+	delete {{@minigame}{@arena}.eventotempo}
+	delete {{@minigame}{@arena}.tempoevt}
+	delete {{@minigame}{@arena}.tempovencedor}
+	delete {{@minigame}{@arena}.evt}
+	delete {{@minigame}{@arena}.fireworktype::*}
+	delete {{@minigame}{@arena}.fwtype}
+	delete {{@minigame}{@arena}.color::*}
+	delete {{@minigame}{@arena}.cagedamage}
+
+on death of player:
+	set {_p} to 0
+	if "%victim's world%" is "{@mundo}":
+		set {{@minigame}{@arena}.kills.%attacker%} to {{@minigame}{@arena}.kills.%attacker%}+1
+		set {kills.%attacker%} to {kills.%attacker%}+1
+		set {deaths.%victim%} to {deaths.%victim%}+1
+		delete {kit.%victim%}
+		remove victim from {{@minigame}{@arena}.jogadores::*}
+		delete {ingame.%victim%}
+		delete {minigame.%victim%}
+		add {@KILL-MONEY} to attacker's balance
+		send "{@PREFIX} &aVocê ganhou {@KILL-MONEY} coins."
+		set {_victim} to victim
+		set {_attacker} to attacker
+		if "%{_attacker}%" contains "<none>":
+			broadcast "{@VICTIM-DISPLAYNAME} &emorreu." to "{@mundo}" parsed as world
+		else:
+			broadcast "{@VICTIM-DISPLAYNAME} &efoi morto por {@ATTACKER-DISPLAYNAME}." to "{@mundo}" parsed as world
+		send victim title "&eSKYWARS" with subtitle "&7Você perdeu e está no modo ESPECTADOR."
+		wait 1 tick
+		set the victim's gamemode to spectator
+		teleport victim to location ({@LOBBYWAIT}) in world "{@mundo}"
+		#teleport player to spawn point of "{@lobby}" parsed as world
+		wait 1 tick
+		heal victim
+
+command /{@minigame}{@arena}salvar:
+	permission: admin.admin
+	trigger:
+		send "{@PREFIX} &aSalvando a arena {@minigame}{@arena}..."
+		delete {{@minigame}{@arena}.blocks::*}
+		wait 1 tick
+		set {_x} to 0
+		set {_pos1} to location at ({@POS-1}) in world "{@mundo}"
+		set {_pos2} to location at ({@POS-2}) in world "{@mundo}"
+		loop blocks within {_pos1} to {_pos2}:
+			if loop-block is not air:
+				add 1 to {_x}
+				set {{@minigame}{@arena}.blocks::%location of loop-block%} to type of block at loop-block
+				broadcast "%location of loop-block% = %type of block at loop-block%" to "{@mundo}" parsed as world
+				if {_x} > 100:
+					wait 1 ticks
+					set {_x} to 0
+		send "{@PREFIX} &aArena {@minigame}{@arena} salva."
+
+on join:
+	delete {{@minigame}{@arena}.kills.%player%}
+
+on quit:
+	delete {{@minigame}{@arena}.kills.%player%}
+
+command /{@minigame}{@arena}forcestart:
+	permission: admin.admin
+	trigger:
+		if {{@minigame}{@arena}.iniciou} = "iniciando":
+			set {{@minigame}{@arena}.tempoinicio} to 2
+
+command /{@minigame}{@arena}join:
+	trigger:
+		set {_player} to player
+		if {{@minigame}{@arena}.iniciou} is not set:
+			if {ingame.%player%} is true:
+				send "{@PREFIX} &cVocê já está jogando"
+			else:
+				if size of {{@minigame}{@arena}.jogadores::*} < 13:
+					teleport player to location ({@LOBBYWAIT}) in "{@mundo}"
+					add player to {{@minigame}{@arena}.jogadores::*}
+					broadcast "{@PLAYER-DISPLAYNAME} &eentrou na partida (&b%size of {{@minigame}{@arena}.jogadores::*}%&e/&b12&e)!" to "{@mundo}"
+					set {ingame.%player%} to true
+					set {minigame.%player%} to "{@minigame}{@arena}"
+					execute console command "{@minigame}{@arena}start"
+					delete {{@minigame}{@arena}.kills.%player%}
+					delete {kit.%player%}
+				else:
+					send "{@PREFIX} &cA partida está cheia"
+		else if {{@minigame}{@arena}.iniciou} is "iniciando":
+			if {ingame.%player%} is true:
+				send "{@PREFIX} &cVocê já está jogando"
+			else:
+				if size of {{@minigame}{@arena}.jogadores::*} < 13:
+					teleport player to location ({@LOBBYWAIT}) in "{@mundo}"
+					add player to {{@minigame}{@arena}.jogadores::*}
+					broadcast "{@PLAYER-DISPLAYNAME} &eentrou na partida (&b%size of {{@minigame}{@arena}.jogadores::*}%&e/&b12&e)!" to "{@mundo}"
+					set {ingame.%player%} to true
+					set {minigame.%player%} to "{@minigame}{@arena}"
+					execute console command "{@minigame}{@arena}start"
+					delete {{@minigame}{@arena}.kills.%player%}
+					delete {kit.%player%}
+				else:
+					send "{@PREFIX} &cA partida está cheia"
+		else if {{@minigame}{@arena}.iniciou} is "resetando":
+			send "{@PREFIX} &cA arena está resetando."
+		else:
+			send "{@PREFIX} &cEssa partida já iniciou"
+			stop
+
+command /{@minigame}{@arena}leave:
+	trigger:
+		if {ingame.%player%} is true:
+			teleport player to spawn point of "{@lobby}" parsed as world
+		else:
+			send "{@PREFIX} &cVocê não está jogando"
+
+command /{@minigame}{@arena}start:
+	executable by: console
+	trigger:
+		if {{@minigame}{@arena}.iniciou} is not set:
+			if size of {{@minigame}{@arena}.jogadores::*} < {@min-players}:
+				delete {{@minigame}{@arena}.iniciou}
+			else if size of {{@minigame}{@arena}.jogadores::*} = {@min-players}:
+				set {{@minigame}{@arena}.iniciou} to "iniciando"
+				set {{@minigame}{@arena}.tempoinicio} to {@tempo-do-lobbywait}
+		else if {{@minigame}{@arena}.iniciou} = "iniciando":
+			if size of {{@minigame}{@arena}.jogadores::*} < {@min-players}:
+				delete {{@minigame}{@arena}.iniciou}
+				send "{@PREFIX} &cJogadores insuficientes para o jogo." to {{@minigame}{@arena}.jogadores::*}
+			else if size of {{@minigame}{@arena}.jogadores::*} = {@min-players}:
+				set {{@minigame}{@arena}.iniciou} to "iniciando"
+				set {{@minigame}{@arena}.tempoinicio} to {@tempo-do-lobbywait}
+			else if size of {{@minigame}{@arena}.jogadores::*} = 10:
+				set {{@minigame}{@arena}.iniciou} to "iniciando"
+				set {{@minigame}{@arena}.tempoinicio} to {@tempo-do-lobbywait-cheio}
+
+every second:
+	if {{@minigame}{@arena}.iniciou} is "iniciou":
+		if size of {{@minigame}{@arena}.jogadores::*} < 1:
+			set {{@minigame}{@arena}.iniciou} to "resetando"
+			execute console command "{@minigame}{@arena}resetar"
+		else if size of {{@minigame}{@arena}.jogadores::*} = 1:
+			set {{@minigame}{@arena}.iniciou} to "vencedor"
+			execute console command "{@minigame}{@arena}vencedor"
+
+	if {{@minigame}{@arena}.iniciou} = "vencedor":
+		loop {@tempo-da-comemoracao} times:
+			wait 1 second
+			set {{@minigame}{@arena}.colorchoice} to a random element out of {{@minigame}{@arena}.color::*}
+			set {{@minigame}{@arena}.fwtype} to a random element out of {{@minigame}{@arena}.fireworktype::*}
+		
+
+	if {{@minigame}{@arena}.evt} = 0:
+		set {{@minigame}{@arena}.eventonome} to "Refil"
+		set {{@minigame}{@arena}.eventotempo} to {{@minigame}{@arena}.tempoevt}
+	if {{@minigame}{@arena}.evt} = 1:
+		set {{@minigame}{@arena}.eventonome} to "Refil"
+		set {{@minigame}{@arena}.eventotempo} to {{@minigame}{@arena}.tempoevt}
+	if {{@minigame}{@arena}.evt} = 2:
+		set {{@minigame}{@arena}.eventonome} to "Fim"
+		set {{@minigame}{@arena}.eventotempo} to {{@minigame}{@arena}.tempopartida}
+
+
+
+	if {{@minigame}{@arena}.iniciou} = "iniciando":
+		if {{@minigame}{@arena}.tempoinicio} > 0:
+			set {{@minigame}{@arena}.tempoinicio} to {{@minigame}{@arena}.tempoinicio}-1
+		else:
+			set {{@minigame}{@arena}.iniciou} to "cage"
+			#set {{@minigame}{@arena}.tempocage} to {@tempo-das-cages}
+			set {{@minigame}{@arena}.tempocage} to 10
+			execute console command "{@minigame}{@arena}cage"
+	else if {{@minigame}{@arena}.iniciou} = "cage":
+		if {{@minigame}{@arena}.tempocage} > 0:
+			set {{@minigame}{@arena}.tempocage} to {{@minigame}{@arena}.tempocage}-1
+		else:
+			set {{@minigame}{@arena}.iniciou} to "iniciou"
+			set {{@minigame}{@arena}.tempopartida} to {@tempo-da-partida}
+			set {{@minigame}{@arena}.tempoevt} to {@tempo-de-eventos}
+			execute console command "{@minigame}{@arena}partida"
+	else if {{@minigame}{@arena}.iniciou} = "iniciou":
+		if {{@minigame}{@arena}.tempopartida} > 0:
+			set {{@minigame}{@arena}.tempopartida} to {{@minigame}{@arena}.tempopartida}-1
+			if {{@minigame}{@arena}.tempoevt} > 0:
+				set {{@minigame}{@arena}.tempoevt} to {{@minigame}{@arena}.tempoevt}-1
+			else:
+				execute console command "{@minigame}{@arena}evt"
+		else:
+			set {{@minigame}{@arena}.iniciou} to "vencedor"
+			set {{@minigame}{@arena}.tempovencedor} to {@tempo-da-comemoracao}
+			execute console command "{@minigame}{@arena}vencedor"
+	else if {{@minigame}{@arena}.iniciou} = "vencedor":
+		if {{@minigame}{@arena}.tempovencedor} > 0:
+			set {{@minigame}{@arena}.tempovencedor} to {{@minigame}{@arena}.tempovencedor}-1
+		else:
+			execute console command "{@minigame}{@arena}resetar"
+
+command /{@minigame}{@arena}evt:
+	trigger:
+		send {{@minigame}{@arena}.jogadores::*} title "" with subtitle "&eOs baús foram recarregados!"
+		if {{@minigame}{@arena}.evt} = 0:
+			set {{@minigame}{@arena}.tempoevt} to {@tempo-de-eventos}
+			set {{@minigame}{@arena}.evt} to 1
+			set {_pos1} to location at ({@POS-1}) in world "{@mundo}"
+			set {_pos2} to location at ({@POS-2}) in world "{@mundo}"
+			loop blocks within {_pos1} to {_pos2}:
+				if type of loop-block is chest:
+					clear the inventory of the loop-block
+					wait 1 tick
+					loop 10 times:
+						add random element of {feast.items.{@MODO-var}::*} to loop-block
+			stop
+		else if {{@minigame}{@arena}.evt} = 1:
+			set {{@minigame}{@arena}.tempoevt} to {@tempo-de-eventos}
+			set {{@minigame}{@arena}.evt} to 2
+			set {_pos1} to location at ({@POS-1}) in world "{@mundo}"
+			set {_pos2} to location at ({@POS-2}) in world "{@mundo}"
+			loop blocks within {_pos1} to {_pos2}:
+				if type of loop-block is chest:
+					clear the inventory of the loop-block
+					wait 1 tick
+					loop 10 times:
+						add random element of {refill.items.{@MODO-var}::*} to loop-block
+			stop
+			
+
+command /{@minigame}{@arena}cage:
+	executable by: console
+	trigger:
+		send {{@minigame}{@arena}.jogadores::*} title "&eSKYWARS" with subtitle "&cModo {@MODO-tx1}"
+		set {_{@minigame}{@arena}.cages::*} to {{@minigame}{@arena}.jogadores::*}
+		set {_count} to 0
+		
+		loop 12 times:
+			set {_count} to {_count}+1
+			if {_count} = 1:
+				set {_spawn} to location ({@SPAWN-01}) in "{@mundo}"
+			if {_count} = 2:
+				set {_spawn} to location ({@SPAWN-02}) in "{@mundo}"
+			if {_count} = 3:
+				set {_spawn} to location ({@SPAWN-03}) in "{@mundo}"
+			if {_count} = 4:
+				set {_spawn} to location ({@SPAWN-04}) in "{@mundo}"
+			if {_count} = 5:
+				set {_spawn} to location ({@SPAWN-05}) in "{@mundo}"
+			if {_count} = 6:
+				set {_spawn} to location ({@SPAWN-06}) in "{@mundo}"
+			if {_count} = 7:
+				set {_spawn} to location ({@SPAWN-07}) in "{@mundo}"
+			if {_count} = 8:
+				set {_spawn} to location ({@SPAWN-08}) in "{@mundo}"
+			if {_count} = 9:
+				set {_spawn} to location ({@SPAWN-09}) in "{@mundo}"
+			if {_count} = 10:
+				set {_spawn} to location ({@SPAWN-10}) in "{@mundo}"
+			if {_count} = 11:
+				set {_spawn} to location ({@SPAWN-11}) in "{@mundo}"
+			if {_count} = 12:
+				set {_spawn} to location ({@SPAWN-12}) in "{@mundo}"
+
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+			set block at {_spawn} to glass
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}+4
+			set block at {_spawn} to glass
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+			set x-coordinate of {_spawn} to x-coordinate of {_spawn}-1
+			set block at {_spawn} to glass
+			set x-coordinate of {_spawn} to x-coordinate of {_spawn}+2
+			set block at {_spawn} to glass
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+			set x-coordinate of {_spawn} to x-coordinate of {_spawn}-2
+			set block at {_spawn} to glass
+			set x-coordinate of {_spawn} to x-coordinate of {_spawn}+2
+			set block at {_spawn} to glass
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+			set x-coordinate of {_spawn} to x-coordinate of {_spawn}-2
+			set block at {_spawn} to glass
+			set x-coordinate of {_spawn} to x-coordinate of {_spawn}+2
+			set block at {_spawn} to glass
+			set x-coordinate of {_spawn} to x-coordinate of {_spawn}-1
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}+2
+			set z-coordinate of {_spawn} to z-coordinate of {_spawn}-1
+			set block at {_spawn} to glass
+			set z-coordinate of {_spawn} to z-coordinate of {_spawn}+2
+			set block at {_spawn} to glass
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+			set z-coordinate of {_spawn} to z-coordinate of {_spawn}-2
+			set block at {_spawn} to glass
+			set z-coordinate of {_spawn} to z-coordinate of {_spawn}+2
+			set block at {_spawn} to glass
+			set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+			set z-coordinate of {_spawn} to z-coordinate of {_spawn}-2
+			set block at {_spawn} to glass
+			set z-coordinate of {_spawn} to z-coordinate of {_spawn}+2
+			set block at {_spawn} to glass
+		set {_count} to 0
+		loop size of {_{@minigame}{@arena}.cages::*} times:
+			set {_count} to {_count}+1
+			set {_p} to random element of {_{@minigame}{@arena}.cages::*}
+			clear {_p}'s inventory
+			remove {_p} from {_{@minigame}{@arena}.cages::*}
+			if {_count} = 1:
+				teleport {_p} to location ({@SPAWN-01}) in "{@mundo}"
+			if {_count} = 2:
+				teleport {_p} to location ({@SPAWN-02}) in "{@mundo}"
+			if {_count} = 3:
+				teleport {_p} to location ({@SPAWN-03}) in "{@mundo}"
+			if {_count} = 4:
+				teleport {_p} to location ({@SPAWN-04}) in "{@mundo}"
+			if {_count} = 5:
+				teleport {_p} to location ({@SPAWN-05}) in "{@mundo}"
+			if {_count} = 6:
+				teleport {_p} to location ({@SPAWN-06}) in "{@mundo}"
+			if {_count} = 7:
+				teleport {_p} to location ({@SPAWN-07}) in "{@mundo}"
+			if {_count} = 8:
+				teleport {_p} to location ({@SPAWN-08}) in "{@mundo}"
+			if {_count} = 9:
+				teleport {_p} to location ({@SPAWN-09}) in "{@mundo}"
+			if {_count} = 10:
+				teleport {_p} to location ({@SPAWN-10}) in "{@mundo}"
+			if {_count} = 11:
+				teleport {_p} to location ({@SPAWN-11}) in "{@mundo}"
+			if {_count} = 12:
+				teleport {_p} to location ({@SPAWN-12}) in "{@mundo}"
+		wait 5 seconds
+		send {{@minigame}{@arena}.jogadores::*} title "&c5" with subtitle "&ePrepare para lutar!"
+		play "CLICK" to {{@minigame}{@arena}.jogadores::*} at volume 1
+		wait 1 second
+		send {{@minigame}{@arena}.jogadores::*} title "&c4" with subtitle "&ePrepare para lutar!"
+		play "CLICK" to {{@minigame}{@arena}.jogadores::*} at volume 1
+		wait 1 second
+		send {{@minigame}{@arena}.jogadores::*} title "&c3" with subtitle "&ePrepare para lutar!"
+		play "CLICK" to {{@minigame}{@arena}.jogadores::*} at volume 1
+		wait 1 second
+		send {{@minigame}{@arena}.jogadores::*} title "&c2" with subtitle "&ePrepare para lutar!"
+		play "CLICK" to {{@minigame}{@arena}.jogadores::*} at volume 1
+		wait 1 second
+		send {{@minigame}{@arena}.jogadores::*} title "&c1" with subtitle "&ePrepare para lutar!"
+		play "CLICK" to {{@minigame}{@arena}.jogadores::*} at volume 1
+		wait 1 second
+		loop {{@minigame}{@arena}.jogadores::*}:
+			heal the loop-value
+		execute console command "hiperland-core iniciou {@minigame}{@arena}"
+		set {_spawn} to location ({@SPAWN-01}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-02}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-03}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-04}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-05}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-06}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-07}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-08}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-09}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-10}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-11}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		set {_spawn} to location ({@SPAWN-12}) in "{@mundo}"
+		set y-coordinate of {_spawn} to y-coordinate of {_spawn}-1
+		set block at {_spawn} to air
+		send {{@minigame}{@arena}.jogadores::*} title "&c&lMODO {@MODO-tx2}!" with subtitle "&9hiperland.ga"
+		play "CLICK" to {{@minigame}{@arena}.jogadores::*} at volume 1
+		play "PORTAL_TRIGGER" to {{@minigame}{@arena}.jogadores::*} at volume 1
+
+command /{@minigame}{@arena}partida:
+	executable by: console
+	trigger:
+		set {{@minigame}{@arena}.evt} to 0
+		set {{@minigame}{@arena}.cagedamage} to true
+		wait 5 seconds
+		loop {{@minigame}{@arena}.jogadores::*}:
+			heal the loop-value
+			set {played.%loop-value%} to {played.%loop-value%}+1
+		wait 5 seconds
+		delete {{@minigame}{@arena}.cagedamage}
+
+command /{@minigame}{@arena}vencedor:
+	executable by: console
+	trigger:
+		if {{@minigame}{@arena}.premio} is not set:
+			if {{@minigame}{@arena}.iniciou} is "vencedor":
+				set {{@minigame}{@arena}.premio} to true
+				set {_players} to size of {{@minigame}{@arena}.jogadores::*}
+				loop {{@minigame}{@arena}.jogadores::*}:
+					set {wins.%loop-value%} to {wins.%loop-value%}+1
+				add {@WIN-MONEY}/{_players} to {{@minigame}{@arena}.jogadores::*}'s balance
+				broadcast "&a&m-----------------------------------------------------" to "{@mundo}"
+				broadcast "" to "{@mundo}"
+				broadcast "                   &f&lSkyWars " to "{@mundo}"
+				broadcast "" to "{@mundo}"
+				if {_players} = 1:
+					broadcast "&e&lVencedor &7&l- %{{@minigame}{@arena}.jogadores::*}%" to "{@mundo}"
+					send {{@minigame}{@arena}.jogadores::*} title "&e&lVITÓRIA!" with subtitle "Parabéns, você é o último jogador de pé!"
+				else if {_players} > 1:
+					set {_ps} to "%{{@minigame}{@arena}.jogadores::*}%"
+					replace all " and " with " e " in {_ps}
+					broadcast "&e&lVencedores&7&l: &7%{_ps}%" to "{@mundo}"
+					send {{@minigame}{@arena}.jogadores::*} title "&e&lEMPATE!" with subtitle "Parabéns, você é um dos jogadores de pé!"
+				broadcast "" to "{@mundo}"
+				if {_players} = 1:
+					broadcast "&6Prêmio: %{@WIN-MONEY}/{_players}% coins." to "{@mundo}"
+				else if {_players} > 1:
+					broadcast "&6Prêmio: %{@WIN-MONEY}/{_players}% coins para cada jogador." to "{@mundo}"
+				broadcast "" to "{@mundo}"
+				broadcast "&a&m-----------------------------------------------------" to "{@mundo}"
+				loop {@tempo-da-comemoracao} times:
+					launch creeper firework colored red at {{@minigame}{@arena}.jogadores::*} timed 1
+					wait 1 second
+
+command /{@minigame}{@arena}resetar:
+	executable by: console
+	trigger:
+		set {{@minigame}{@arena}.iniciou} to "resetando"
+		delete {{@minigame}{@arena}.tempoinicio}
+		delete {{@minigame}{@arena}.tempocage}
+		delete {{@minigame}{@arena}.eventonome}
+		delete {{@minigame}{@arena}.eventotempo}
+		delete {{@minigame}{@arena}.tempoevt}
+		delete {{@minigame}{@arena}.tempovencedor}
+		delete {{@minigame}{@arena}.evt}
+		delete {{@minigame}{@arena}.cagedamage}
+		delete {{@minigame}{@arena}.premio}
+		loop {{@minigame}{@arena}.jogadores::*}:
+			delete {ingame.%loop-value%}
+			delete {minigame.%loop-value%}
+		delete {{@minigame}{@arena}.jogadores::*}
+		loop all players in world "{@mundo}":
+			teleport loop-player to spawn point of "{@lobby}" parsed as world
+		wait 0.3 seconds
+		set {_pos1} to location at ({@POS-1}) in world "{@mundo}"
+		set {_pos2} to location at ({@POS-2}) in world "{@mundo}"
+		set {_z} to 0
+		loop blocks within {_pos1} to {_pos2}:
+			if {{@minigame}{@arena}.blocks::%location of loop-block%} is set:
+				if type of loop-block is not {{@minigame}{@arena}.blocks::%location of loop-block%}:
+					set block at loop-block to {{@minigame}{@arena}.blocks::%location of loop-block%}
+				set {_z} to {_z}+1
+				if {_z} > 10:
+					wait {@ANTILAG} ticks
+					set {_z} to 0
+			else:
+				if loop-block is not air:
+					set block at loop-block to air
+		delete all dropped items in "{@mundo}" parsed as world
+		delete {{@minigame}{@arena}.iniciou}
+		set {_pos1} to location at ({@POS-1}) in world "{@mundo}"
+		set {_pos2} to location at ({@POS-2}) in world "{@mundo}"
+		loop blocks within {_pos1} to {_pos2}:
+			if type of loop-block is chest:
+				clear the inventory of the loop-block
+				loop 10 times:
+					add random element of {chest.items.{@MODO-var}::*} to loop-block
+				wait {@ANTILAG} ticks
+		set {_pos1} to location at ({@FEAST-1}) in world "{@mundo}"
+		set {_pos2} to location at ({@FEAST-2}) in world "{@mundo}"
+		loop blocks within {_pos1} to {_pos2}:
+			if type of loop-block is chest:
+				clear the inventory of the loop-block
+				wait 1 tick
+				loop 10 times:
+					add random element of {feast.items.{@MODO-var}::*} to loop-block
+				wait {@ANTILAG} ticks
+
+on quit:
+	remove player from {{@minigame}{@arena}.jogadores::*}
+	set {_player} to player
+	if "%{minigame.%player%}%" = "{@minigame}{@arena}":
+		broadcast "{@PLAYER-DISPLAYNAME} &esaiu da partida (&b%size of {{@minigame}{@arena}.jogadores::*}%&e/&b12&e)!" to "{@mundo}"
+		if "%{{@minigame}{@arena}.iniciou}%" = "iniciou":
+			set action bar of {{@minigame}{@arena}.jogadores::*} to "&c%size of {{@minigame}{@arena}.jogadores::*}% &ejogadores restantes."
+
+on join:
+	remove player from {{@minigame}{@arena}.jogadores::*}
+
+on place:
+	set {_p} to 0
+	if "%player's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is "iniciou":
+			loop {{@minigame}{@arena}.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_p} to 1
+					stop
+			if {_p} = 1:
+				stop
+			else:
+				cancel event
+		else:
+			cancel event
+
+on break:
+	set {_p} to 0
+	if "%player's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is "iniciou":
+			loop {{@minigame}{@arena}.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_p} to 1
+					stop
+			if {_p} = 1:
+				stop
+			else:
+				cancel event
+		else:
+			cancel event
+
+on drop:
+	set {_p} to 0
+	if "%player's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is "iniciou":
+			loop {{@minigame}{@arena}.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_p} to 1
+					stop
+			if {_p} = 1:
+				stop
+			else:
+				cancel event
+		else:
+			cancel event
+
+on inventory click:
+	set {_p} to 0
+	if "%player's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is "iniciou":
+			loop {{@minigame}{@arena}.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_p} to 1
+					stop
+			if {_p} = 1:
+				stop
+			else:
+				cancel event
+		else:
+			cancel event
+
+on damage:
+	set {_p} to 0
+	if "%victim's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is "iniciou":
+			if {{@minigame}{@arena}.cagedamage} is not set:
+				loop {{@minigame}{@arena}.jogadores::*}:
+					if "%loop-value%" is "%victim%":
+						set {_p} to 1
+						stop
+				if {_p} = 1:
+					stop
+				else:
+					cancel event
+			else:
+				cancel event
+		else:
+			cancel event
+
+on hunger meter change:
+	set {_p} to 0
+	if "%player's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is "iniciou":
+			loop {{@minigame}{@arena}.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_p} to 1
+					stop
+			if {_p} = 1:
+				stop
+			else:
+				cancel event
+		else:
+			cancel event
+
+on pickup:
+	set {_p} to 0
+	if "%player's world%" is "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is "iniciou":
+			loop {{@minigame}{@arena}.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_p} to 1
+					stop
+			if {_p} = 1:
+				stop
+			else:
+				cancel event
+		else:
+			cancel event
+
+on teleport:
+	set {_oldworld} to player's world
+	wait 1 tick
+	set {_newworld} to player's world
+	if "%{_newworld}%" is "{@mundo}":
+		if "%{_oldworld}%" is not equal to "{@mundo}":
+			set {_player} to 0
+			loop {{@minigame}{@arena}.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_player} to 1
+			if {_player} = 0:
+				wait 1 tick
+				set the player's gamemode to spectator
+				teleport player to location ({@LOBBYWAIT}) in world "{@mundo}"
+				stop
+			else:
+				clear the player's inventory
+				wait 1 tick
+				set the player's gamemode to survival
+				set slot 3 of player to chest         named "&9&oKits"
+				set slot 4 of player to player head   named "&c&oPerfil"
+				set slot 5 of player to ender chest   named "&5&oLoja"
+				stop
+	if "%{_oldworld}%" is "{@mundo}":
+		if "%{_newworld}%" is not equal to "{@mundo}":
+			set {_player} to player
+			if {ingame.%player%} is true:
+				teleport player to spawn point of "{@lobby}" parsed as world
+				remove player from {{@minigame}{@arena}.jogadores::*}
+				delete {ingame.%player%}
+				delete {minigame.%player%}
+				execute console command "{@minigame}{@arena}start"
+				delete {{@minigame}{@arena}.kills.%player%}
+				delete {kit.%player%}
+				if {{@minigame}{@arena}.iniciou} is not set:
+					broadcast "{@PLAYER-DISPLAYNAME} &esaiu da partida (&b%size of {{@minigame}{@arena}.jogadores::*}%&e/&b12&e)!" to "{@mundo}"
+				else if {{@minigame}{@arena}.iniciou} = "iniciando":
+					broadcast "{@PLAYER-DISPLAYNAME} &esaiu da partida (&b%size of {{@minigame}{@arena}.jogadores::*}%&e/&b12&e)!" to "{@mundo}"
+				else:
+					broadcast "{@PLAYER-DISPLAYNAME} &esaiu da partida." to "{@mundo}"
+					set action bar of {{@minigame}{@arena}.jogadores::*} to "&c%size of {{@minigame}{@arena}.jogadores::*}% &ejogadores restantes."
+				send "{@PREFIX} &7Você saiu da partida."
+
+every 19 tick:
+	loop all players in world "{@mundo}":
+		if {{@minigame}{@arena}.iniciou} is not set:
+			set {_count} to size of {{@minigame}{@arena}.jogadores::*}+0
+
+			wipe loop-player's sidebar
+			set name of sidebar of loop-player to "&e&lSKY&6&lWARS"
+			set score "&7%now%" in sidebar of loop-player to 15
+			set score " " in sidebar of loop-player to 14
+			set score "&fEstado:" in sidebar of loop-player to 13
+			set score "&aEsperando..." in sidebar of loop-player to 12
+			set score "  " in sidebar of loop-player to 11
+			set score "&fJogadores:" in sidebar of loop-player to 10
+			set score "&a%{_count}%/12" in sidebar of loop-player to 9
+			set score "   " in sidebar of loop-player to 8
+			set score "&fMapa: &a{@nome-do-mapa}" in sidebar of loop-player to 7
+			set score "&fAutor(a): &a{@autor-do-mapa}" in sidebar of loop-player to 6
+			set score "    " in sidebar of loop-player to 5
+			set score "&fServer: &a{@minigame}{@arena}{@MODO-tx2}" in sidebar of loop-player to 4
+			set score "     " in sidebar of loop-player to 3
+			set score "&ehiperland.ga" in sidebar of loop-player to 2
+		else if {{@minigame}{@arena}.iniciou} is "iniciando":
+			set {_count} to size of {{@minigame}{@arena}.jogadores::*}+0
+
+			set {_iniciando} to {{@minigame}{@arena}.tempoinicio}+0
+
+			wipe loop-player's sidebar
+			set name of sidebar of loop-player to "&e&lSKY&6&lWARS"
+			set score "&7%now%" in sidebar of loop-player to 15
+			set score " " in sidebar of loop-player to 14
+			set score "&fIniciando em:" in sidebar of loop-player to 13
+			set score "&a%{_iniciando}% segundos" in sidebar of loop-player to 12
+			set score "  " in sidebar of loop-player to 11
+			set score "&fJogadores:" in sidebar of loop-player to 10
+			set score "&a%{_count}%/12" in sidebar of loop-player to 9
+			set score "   " in sidebar of loop-player to 8
+			set score "&fMapa: &a{@nome-do-mapa}" in sidebar of loop-player to 7
+			set score "&fAutor(a): &a{@autor-do-mapa}" in sidebar of loop-player to 6
+			set score "    " in sidebar of loop-player to 5
+			set score "&fServer: &a{@minigame}{@arena}{@MODO-tx2}" in sidebar of loop-player to 4
+			set score "     " in sidebar of loop-player to 3
+			set score "&ehiperland.ga" in sidebar of loop-player to 2
+		else if {{@minigame}{@arena}.iniciou} is "cage":
+			set {_count} to size of {{@minigame}{@arena}.jogadores::*}+0
+
+			set {_abrindo} to {{@minigame}{@arena}.tempocage}+0
+
+			wipe loop-player's sidebar
+			set name of sidebar of loop-player to "&e&lSKY&6&lWARS"
+			set score "&7%now%" in sidebar of loop-player to 15
+			set score " " in sidebar of loop-player to 14
+			set score "&fAbrindo cage em:" in sidebar of loop-player to 13
+			set score "&a%{_abrindo}% segundos" in sidebar of loop-player to 12
+			set score "  " in sidebar of loop-player to 11
+			set score "&fJogadores:" in sidebar of loop-player to 10
+			set score "&a%{_count}%/12" in sidebar of loop-player to 9
+			set score "   " in sidebar of loop-player to 8
+			set score "&fMapa: &a{@nome-do-mapa}" in sidebar of loop-player to 7
+			set score "&fAutor(a): &a{@autor-do-mapa}" in sidebar of loop-player to 6
+			set score "    " in sidebar of loop-player to 5
+			set score "&fServer: &a{@minigame}{@arena}{@MODO-tx2}" in sidebar of loop-player to 4
+			set score "     " in sidebar of loop-player to 3
+			set score "&ehiperland.ga" in sidebar of loop-player to 2
+		else if {{@minigame}{@arena}.iniciou} is "iniciou":
+			set {_eventonome} to {{@minigame}{@arena}.eventonome} parsed as text
+			replace all "<none>" with "" in {_eventonome}
+
+			set {_eventotempo} to {{@minigame}{@arena}.eventotempo}+0
+			replace all "<none>" with "" in {_eventotempo}
+
+			set {_kills} to {{@minigame}{@arena}.kills.%loop-player%}+0
+			replace all "<none>" with "0" in {_kills}
+
+			set {_abrindo} to {{@minigame}{@arena}.tempocage}+0
+			replace all "<none>" with "" in {_abrindo}
+
+			set {_vivos} to size of {{@minigame}{@arena}.jogadores::*}+0
+
+			wipe loop-player's sidebar
+			set name of sidebar of loop-player to "&e&lSKY&6&lWARS"
+			set score "&7%now%" in sidebar of loop-player to 15
+			set score " " in sidebar of loop-player to 14
+			set score "&fPróximo evento:" in sidebar of loop-player to 13
+			set score "&a%{_eventonome}%: %{_eventotempo}% segundos" in sidebar of loop-player to 12
+			set score "  " in sidebar of loop-player to 11
+			set score "&fMatou: &a%{_kills}%" in sidebar of loop-player to 10
+			set score "   " in sidebar of loop-player to 9
+			set score "&fVivos: &a%{_vivos}%" in sidebar of loop-player to 8
+			set score "    " in sidebar of loop-player to 7
+			set score "&fMapa: &a{@nome-do-mapa}" in sidebar of loop-player to 6
+			set score "&fAutor(a): &a{@autor-do-mapa}" in sidebar of loop-player to 5
+			set score "     " in sidebar of loop-player to 4
+			set score "&fServer: &a{@minigame}{@arena}{@MODO-tx2}" in sidebar of loop-player to 3
+			set score "      " in sidebar of loop-player to 2
+			set score "&ehiperland.ga" in sidebar of loop-player to 1
+
+#on rightclick on sign:
+#	if "%player's world%" is "{@lobby}":
+#		line 1 of event-block contains "[ENTRAR]" or "[SW]"
+#		line 2 of event-block contains "SOLO" or "{@minigame}{@arena}"
+#		line 4 of event-block contains "Modo {@MODO-var}" or ""
+#		make player execute "{@minigame}{@arena}join"
+#		set line 1 of event-block to "&a[ENTRAR]"
+#		set line 2 of event-block to "&0&lSOLO"
+#		set line 3 of event-block to "%size of {{@minigame}{@arena}.jogadores::*}% na Fila"
+#		set line 4 of event-block to "&1Modo {@MODO-var}"

@@ -1,0 +1,696 @@
+﻿options:
+	autojoin: false
+	join-world: lobby
+	spawn-mobs: false
+	
+	lobby-loc: -273.5, 104.0, 452.5
+	lobby-world: lobby
+	
+	title: false #true = titles, false = actionbar
+	
+	antilag: 1	#tick
+
+on load:
+	set {hiperland-core.antilag} to {@antilag}
+
+command /tempdeop [<text>]:
+	permission: "owner.owner"
+	usage: /tempdeop <5/10/20/40/60/120>
+	trigger:
+		if arg 1 is set:
+			execute console command "deop %player%"
+		if arg 1 is "5":
+			execute console command "su tempactionbar 100 %player%"
+			wait 5 seconds
+		else if arg 1 is "10":
+			execute console command "su tempactionbar 200 %player%"
+			wait 10 seconds
+		else if arg 1 is "20":
+			execute console command "su tempactionbar 400 %player%"
+			wait 20 seconds
+		else if arg 1 is "40":
+			execute console command "su tempactionbar 800 %player%"
+			wait 40 seconds
+		else if arg 1 is "60":
+			execute console command "su tempactionbar 1200 %player%"
+			wait 60 seconds
+		else if arg 1 is "120":
+			execute console command "su tempactionbar 2400 %player%"
+			wait 120 seconds
+		execute console command "op %player%"
+
+command /autojoin:
+	trigger:
+		set {_arena} to "hiperland-core"
+		set {_players} to -1
+		loop {hiperland.minigames::*}:
+			if {%loop-value%.iniciou} = "iniciando":
+				add "%loop-value%" to {_arenas::*}
+			else if {%loop-value%.iniciou} is not set:
+				add "%loop-value%" to {_arenas::*}
+		loop {_arenas::*}:
+			if size of {%loop-value%.jogadores::*} > {_players}:
+				set {_arena} to "%loop-value%"
+				set {_players} to size of {%loop-value%.jogadores::*}
+			else if size of {%loop-value%.jogadores::*} = {_players}:
+				if random integer between 0 and 1 = 0:
+					set {_arena} to "%loop-value%"
+					set {_players} to size of {%loop-value%.jogadores::*}
+		if {_arena} = "hiperland-core":
+			send "&9Skywars> &cNenhuma arena disponível."
+		else:
+			make player execute "%{_arena}%join"
+
+command /seguir <player>:
+	trigger:
+		if arg 1 is player:
+			send "&9Hiperland> &cVocê não pode fazer isso."
+		else:
+			if {minigame.%arg 1%} is set:
+				make player execute "%{minigame.%arg 1%}%join"
+			else:
+				send "&9Hiperland>&7 %arg 1% não está jogando em nenhuma arena."
+		
+command /espec <player>:
+	permission: admin.admin
+	trigger:
+		if {minigame.%arg 1%} is set:
+			send "&9Hiperland-core>&7 %arg 1% está jogando na arena %{minigame.%arg 1%}%."
+			teleport player to "%arg 1%" parsed as player
+		else:
+			send "&9Hiperland-core>&7 %arg 1% não está jogando em nenhuma arena."
+			teleport player to "%arg 1%" parsed as player
+
+command /arenas:
+	trigger:
+		wait 1 tick
+		open chest with 3 rows named "Skywars" to player
+		wait 1 tick
+		set {_slot} to 0
+		loop {hiperland.minigames::*}:
+			set {_c} to "%{%loop-value%.jogadores::*}%"
+			replace all ", " with "||" in {_c}
+			replace all " and " with "||" in {_c}
+			replace all "<none>" with "Ninguém" in {_c}
+			if {%loop-value%.iniciou} is not set:
+				format slot {_slot} of player with 1 white glass named "&f&l%{%loop-value%.nome-do-mapa}% &r&f(%{%loop-value%.autor-do-mapa}%)" with lore "&fEsperando||%{_c}%" to close then run "sudo %player% %loop-value%join"
+			else if {%loop-value%.iniciou} = "iniciando":
+				format slot {_slot} of player with 1 light green glass named "&f&l%{%loop-value%.nome-do-mapa}% &r&f(%{%loop-value%.autor-do-mapa}%)" with lore "&aIniciando||%{_c}%" to close then run "sudo %player% %loop-value%join"
+			else if {%loop-value%.iniciou} is "cage":
+				format slot {_slot} of player with 1 red glass named "&f&l%{%loop-value%.nome-do-mapa}% &r&f(%{%loop-value%.autor-do-mapa}%)" with lore "&4Iniciando||%{_c}%" to close then run "sudo %player% %loop-value%join"
+			else if {%loop-value%.iniciou} is "iniciou":
+				format slot {_slot} of player with 1 red glass named "&f&l%{%loop-value%.nome-do-mapa}% &r&f(%{%loop-value%.autor-do-mapa}%)" with lore "&4Em jogo||&7%size of {%loop-value%.jogadores::*}%/12||%{_c}%" to close then run "sudo %player% %loop-value%join"
+			else if {%loop-value%.iniciou} is "vencedor":
+				format slot {_slot} of player with 1 red glass named "&f&l%{%loop-value%.nome-do-mapa}% &r&f(%{%loop-value%.autor-do-mapa}%)" with lore "&cVencedor:||&7%size of {%loop-value%.jogadores::*}%/12" to close then run "sudo %player% %loop-value%join"
+			else if {%loop-value%.iniciou} is "resetando":
+				format slot {_slot} of player with 1 yellow glass named "&f&l%{%loop-value%.nome-do-mapa}% &r&f(%{%loop-value%.autor-do-mapa}%)" with lore "&eResetando" to close then run "sudo %player% %loop-value%join"
+			set {_slot} to {_slot}+1
+
+on load:
+	wait 30 seconds
+	add "default" to {hiperland.freekits::*}
+	add "wooden pickaxe" to {hiperland.kit.default::*}
+	add "wooden axe"     to {hiperland.kit.default::*}
+	add "wooden shovel"  to {hiperland.kit.default::*}
+
+	add "enderpearl"  to {hiperland.vipkits::*}
+	add "ender pearl" to {hiperland.kit.enderpearl::*}
+
+	add "arqueiro" to {hiperland.vipkits::*}
+	add "bow"      to {hiperland.kit.arqueiro::*}
+	add "32 arrow" to {hiperland.kit.arqueiro::*}
+
+	add "bow of power 1" parsed as item to {chest.items.insano::*}
+	add "ender pearl" parsed as item to {chest.items.insano::*}
+	add "lava bucket" parsed as item to {chest.items.insano::*}
+	add "water bucket" parsed as item to {chest.items.insano::*}
+	add "stone sword" parsed as item to {chest.items.insano::*}
+	add "stone sword of sharpness 1" parsed as item to {chest.items.insano::*}
+	add "iron sword" parsed as item to {chest.items.insano::*}
+	add "wood sword of sharpness 1" parsed as item to {chest.items.insano::*}
+	add "diamond pickaxe" parsed as item to {chest.items.insano::*}
+	add "stone pickaxe" parsed as item to {chest.items.insano::*}
+	add "iron pickaxe" parsed as item to {chest.items.insano::*}
+	add "iron axe" parsed as item to {chest.items.insano::*}
+	add "16 stone" parsed as item to {chest.items.insano::*}
+	add "24 stone" parsed as item to {chest.items.insano::*}
+	add "40 stone" parsed as item to {chest.items.insano::*}
+	add "16 wood" parsed as item to {chest.items.insano::*}
+	add "24 wood" parsed as item to {chest.items.insano::*}
+	add "32 wood" parsed as item to {chest.items.insano::*}
+	add "2 golden apple" parsed as item to {chest.items.insano::*}
+	add "golden apple" parsed as item to {chest.items.insano::*}
+	add "fishing rod" parsed as item to {chest.items.insano::*}
+	add "16 snowball" parsed as item to {chest.items.insano::*}
+	add "8 egg" parsed as item to {chest.items.insano::*}
+	add "16 exp bottle" parsed as item to {chest.items.insano::*}
+	add "32 cooked beef" parsed as item to {chest.items.insano::*}
+	add "16 cooked beef" parsed as item to {chest.items.insano::*}
+	add "16 cooked beef" parsed as item to {chest.items.insano::*}
+	add "iron helmet" parsed as item to {chest.items.insano::*}
+	add "iron chestplate" parsed as item to {chest.items.insano::*}
+	add "iron leggings" parsed as item to {chest.items.insano::*}
+	add "iron boots" parsed as item to {chest.items.insano::*}
+	add "chainmail boots" parsed as item to {chest.items.insano::*}
+	add "chainmail leggings" parsed as item to {chest.items.insano::*}
+	add "chainmail chestplate" parsed as item to {chest.items.insano::*}
+	add "chainmail helmet" parsed as item to {chest.items.insano::*}
+	
+	add "lava bucket" parsed as item to {feast.items.insano::*}
+	add "water bucket" parsed as item to {feast.items.insano::*}
+	add "16 steak" parsed as item to {feast.items.insano::*}
+	add "64 log" parsed as item to {feast.items.insano::*}
+	add "64 log" parsed as item to {feast.items.insano::*}
+	add "64 log" parsed as item to {feast.items.insano::*}
+	add "64 log" parsed as item to {feast.items.insano::*}
+	add "bow of power 2" parsed as item to {feast.items.insano::*}
+	add "32 arrow" parsed as item to {feast.items.insano::*}
+	add "64 snowball" parsed as item to {feast.items.insano::*}
+	add "flint and steel" parsed as item to {feast.items.insano::*}
+	add "golden apple" parsed as item to {feast.items.insano::*}
+	add "golden apple" parsed as item to {feast.items.insano::*}
+	add "5 egg" parsed as item to {feast.items.insano::*}
+	add "stone sword of sharpness 3" parsed as item to {feast.items.insano::*}
+	add "slimeball of knockback 1" parsed as item to {feast.items.insano::*}
+	add "iron sword of fire aspect 1" parsed as item to {feast.items.insano::*}
+	add "diamond axe of sharpness 2" parsed as item to {feast.items.insano::*}
+	add "iron helmet of protection 4" parsed as item to {feast.items.insano::*}
+	add "iron chestplate of projectile protection 3" parsed as item to {feast.items.insano::*}
+	add "iron leggings of protection 4" parsed as item to {feast.items.insano::*}
+	add "iron boots of projectile protection 3" parsed as item to {feast.items.insano::*}
+	add "gold helmet of protection 4" parsed as item to {feast.items.insano::*}
+	add "gold chestplate of projectile protection 4" parsed as item to {feast.items.insano::*}
+	add "gold leggings of protection 4" parsed as item to {feast.items.insano::*}
+	add "gold boots of projectile protection 4" parsed as item to {feast.items.insano::*}
+	add "diamond helmet of protection 2" parsed as item to {feast.items.insano::*}
+	add "diamond chestplate of projectile protection 3" parsed as item to {feast.items.insano::*}
+	add "diamond leggings of protection 2" parsed as item to {feast.items.insano::*}
+	
+	add "lava bucket" parsed as item to {refill.items.insano::*}
+	add "water bucket" parsed as item to {refill.items.insano::*}
+	add "16 steak" parsed as item to {refill.items.insano::*}
+	add "64 log" parsed as item to {refill.items.insano::*}
+	add "64 log" parsed as item to {refill.items.insano::*}
+	add "64 log" parsed as item to {refill.items.insano::*}
+	add "64 log" parsed as item to {refill.items.insano::*}
+	add "bow of power 2" parsed as item to {refill.items.insano::*}
+	add "32 arrow" parsed as item to {refill.items.insano::*}
+	add "64 snowball" parsed as item to {refill.items.insano::*}
+	add "flint and steel" parsed as item to {refill.items.insano::*}
+	add "golden apple" parsed as item to {refill.items.insano::*}
+	add "golden apple" parsed as item to {refill.items.insano::*}
+	add "5 egg" parsed as item to {refill.items.insano::*}
+	add "stone sword of sharpness 3" parsed as item to {refill.items.insano::*}
+	add "slimeball of knockback 1" parsed as item to {refill.items.insano::*}
+	add "iron sword of fire aspect 1" parsed as item to {refill.items.insano::*}
+	add "diamond axe of sharpness 2" parsed as item to {refill.items.insano::*}
+	add "iron helmet of protection 4" parsed as item to {refill.items.insano::*}
+	add "iron chestplate of projectile protection 3" parsed as item to {refill.items.insano::*}
+	add "iron leggings of protection 4" parsed as item to {refill.items.insano::*}
+	add "iron boots of projectile protection 3" parsed as item to {refill.items.insano::*}
+	add "gold helmet of protection 4" parsed as item to {refill.items.insano::*}
+	add "gold chestplate of projectile protection 4" parsed as item to {refill.items.insano::*}
+	add "gold leggings of protection 4" parsed as item to {refill.items.insano::*}
+	add "gold boots of projectile protection 4" parsed as item to {refill.items.insano::*}
+	add "diamond helmet of protection 2" parsed as item to {refill.items.insano::*}
+	add "diamond chestplate of projectile protection 3" parsed as item to {refill.items.insano::*}
+	add "diamond leggings of protection 2" parsed as item to {refill.items.insano::*}
+
+on chat:
+	if "%player's world%" is "{@lobby-world}":
+		cancel event
+		if player has permission "vipplus.vipplus":
+			set message to coloured message
+		broadcast "&7%coloured player's prefix%&7%player%&8: &r%message%" to "{@lobby-world}"
+
+on load:
+	set {autojoin} to {@autojoin}
+	set {autojoin-world} to "{@join-world}"
+	wait 1 tick
+	execute console command "save-off" #Importante
+	loop all players:
+		set {ingame.%loop-player%} to false
+	delete {chest.items.insano::*}
+	delete {feast.items.insano::*}
+	delete {refill.items.insano::*}
+	delete {hiperland.minigames::*}
+	delete {hiperland.freekits::*}
+	delete {hiperland.vipkits::*}
+	delete {hiperland.kit.default::*}
+	delete {hiperland.kit.enderpearl::*}
+	delete {hiperland.kit.arqueiro::*}
+
+on unload:
+	loop all players:
+		set {ingame.%loop-player%} to false
+	delete {chest.items.insano::*}
+	delete {feast.items.insano::*}
+	delete {refill.items.insano::*}
+	delete {hiperland.minigames::*}
+	delete {hiperland.freekits::*}
+	delete {hiperland.vipkits::*}
+	delete {hiperland.kit.default::*}
+	delete {hiperland.kit.enderpearl::*}
+	delete {hiperland.kit.arqueiro::*}
+
+on spawn:
+	if {@spawn-mobs} is false:
+		cancel event
+
+command /hiperland-core <text=help> [<text>] [<text>]:
+	executable by: players and console
+	trigger:
+		if arg 1 is "help":
+			send "&9&k&l:::&r&9&l Hiperland Core &9&k&l:::&r"
+			send "&b/hiperland-core help &3| &bMostra esta ajuda"
+			send "&b/hiperland-core tp [mundo] &3| &bTeleporta para o mundo %%[mundo]%%"
+			send "&b/creditos &3| &bCréditos do Hiperland-core"
+			send "&9&k&l:::&r&9&l Hiperland Core &9&k&l:::&r"
+		if arg 2 is set:
+			if arg 1 is "tp":
+				if player has permission "sw.tp":
+					teleport player to spawn point of arg 2 parsed as world
+					set the player's gamemode to creative
+					send "&9Hiperland-core> &aTeleportado para %arg 2%"
+		if "%player%" is "<none>":
+			if arg 2 is set:
+				if arg 1 is "iniciou":
+					loop {%arg 2%.jogadores::*}:
+						set {_count} to 0
+						set {_kit} to "default"
+						loop {hiperland.freekits::*}:
+							if "%{kit.%loop-value-1%}%" = "%loop-value-2%":
+								set {_kit} to "%{kit.%loop-value-1%}%"
+						loop {hiperland.vipkits::*}:
+							if "%{kit.%loop-value-1%}%" = "%loop-value-2%":
+								set {_kit} to "%{kit.%loop-value-1%}%"
+						loop {hiperland.kit.%{_kit}%::*}:
+							set slot {_count} of "%loop-value-1%" parsed as player to "%loop-value-2%" parsed as item
+							set {_count} to {_count}+1
+
+command /setkit <text>:
+	trigger:
+		if {minigame.%player%} is set:
+			set {_c} to 0
+			loop {hiperland.freekits::*}:
+				if "%arg 1%" is "%loop-value-1%":
+					set {kit.%player%} to "%arg 1%"
+					send "&9Skywars> &aVocê escolheu o kit: %arg 1%"
+					set {_c} to 1
+			loop {hiperland.vipkits::*}:
+				if "%arg 1%" is "%loop-value-1%":
+					if player has permission "kit.%loop-value-1%":
+						set {kit.%player%} to "%arg 1%"
+						send "&9Skywars> &aVocê escolheu o kit: %arg 1%"
+					else:
+						send "&9Skywars> &cVocê não tem permissão para escolher este kit."
+					set {_c} to 1
+			if {_c} = 0:
+				send "&9Skywars> &aVocê escolheu o kit: default"
+
+on damage:
+	if victim is online:
+		if victim is not attacker:
+			wait 1 tick
+			set action bar of attacker to "&a%victim%: &c%victim's health% ❤"
+
+
+on join:
+	delete {ingame.%player%}
+	delete {kit.%player%}
+	wait 1 tick
+	set the player's gamemode to adventure
+
+on quit:
+	delete {kit.%player%}
+	delete {ingame.%player%}
+	wait 1 tick
+	set the player's gamemode to adventure
+
+on teleport:
+	set {_oldworld} to player's world
+	wait 1 tick
+	set {_newworld} to player's world
+	if "%{_newworld}%" is "lobby":
+		if "lobby" is not equal to "%{_oldworld}%":
+			wait 1 tick
+			make player execute "lobbyitems"
+			set the player's gamemode to adventure
+			heal the player
+			delete {minigame.%player%}
+
+on load:
+	loop all players:
+		teleport loop-player to location ({@lobby-loc}) in "{@lobby-world}"
+		send loop-player title "&9Hiperland Minigames" with subtitle "Você entrou no lobby!"
+		set the loop-player's gamemode to adventure
+		wait 1 tick
+		make loop-player execute "lobbyitems"
+
+on unload:
+	loop all players:
+		teleport loop-player to location ({@lobby-loc}) in "{@lobby-world}"
+		set the loop-player's gamemode to adventure
+		send loop-player title "&9Hiperland Minigames" with subtitle "Você entrou no lobby!"
+
+command /lobby [<player>]:
+	executable by: players and console
+	trigger:
+		set {_p} to player
+		if "%player%" is "<none>":
+			set {_p} to arg 1
+		teleport {_p} to location ({@lobby-loc}) in "{@lobby-world}"
+		set the player's gamemode to adventure
+		send {_p} title "&9Hiperland Minigames" with subtitle "Você entrou no lobby!"
+
+command /build:
+	trigger:
+		if player has permission "admin.admin":
+			if {build.%player%} is true:
+				delete {build.%player%}
+				send "&9Buildmode> &7Desativado"
+				stop
+			else:
+				set {build.%player%} to true
+				send "&9Buildmode> &7Ativado"
+				stop
+
+on join:
+	teleport player to location ({@lobby-loc}) in "{@lobby-world}"
+	set the player's gamemode to adventure
+	send player title "&9Hiperland Minigames" with subtitle "Seja bem-vindo ao Hiperland!"
+	delete {build.%player%}
+
+on quit:
+	teleport player to location ({@lobby-loc}) in "{@lobby-world}"
+	set the player's gamemode to adventure
+	delete {build.%player%}
+
+on place:
+	if "%player's world%" is "lobby":
+		if player has permission "admin.admin":
+			if {build.%player%} is true:
+				stop
+			else:
+				cancel event
+				stop
+		else:
+			cancel event
+			stop
+
+on break:
+	if "%player's world%" is "lobby":
+		if player has permission "admin.admin":
+			if {build.%player%} is true:
+				stop
+			else:
+				cancel event
+				stop
+		else:
+			cancel event
+			stop
+
+on hunger meter change:
+	if "%player's world%" is "{@lobby-world}":
+		set player's hunger meter to 20
+		heal the player
+		set the player's food level to 10
+
+on damage:
+	if "%victim's world%" is "{@lobby-world}":
+		cancel event
+		set victim's hunger meter to 20
+		heal the victim
+		set the victim's food level to 10
+
+on first join:
+	set {kills.%player%} to 0
+	set {deaths.%player%} to 0
+	set {wins.%player%} to 0
+	set {played.%player%} to 0
+
+command /creditos:
+	trigger:
+		send "&9Hiperland-core> &7Créditos: hiperesp (Fundamentação do Skywars), filipenock (Sistema de reset sem lag do Skywars)"
+
+command /tempactionbar <number> <player>:
+	executable by: console
+	trigger:
+		set {_total} to arg 1
+		set {_percurso} to 0
+		set {_porcentagemold} to 0
+		loop 100 times:
+			add "&c|" to {_value::*}
+		loop arg 1+1 times:
+			set {_porcentagem2} to {_percurso}/{_total}
+			set {_porcentagem} to {_porcentagem2} * 100
+			if rounded {_porcentagem} is not equal to {_porcentagemold}:
+				loop (rounded {_porcentagem})-{_porcentagemold} times:
+					remove "&c|" from {_value::*}
+					add "&a|" to {_value::*}
+				set {_porcentagemold} to rounded {_porcentagem}
+			set {_percurso} to {_percurso}+1
+			set {_value} to "%{_value::*}%"
+			replace all ", " with "" in {_value}
+			replace all " and " with "" in {_value}
+			if {@title} is true:
+				send arg 2 title "" with subtitle "%{_value}%"
+			else:
+				set action bar of arg 2 to "%{_value}%"
+			wait 1 tick
+		if {@title} is true:
+			send arg 2 title "" with subtitle ""
+		else:
+			set action bar of arg 2 to ""
+
+on join:
+	set the player's gamemode to adventure
+
+every 19 tick:
+	loop all players in world "{@lobby-world}":
+		wipe loop-player's sidebar
+		set name of sidebar of loop-player to "&e&lSKY&6&lWARS"
+		set score "&7%now%" in sidebar of loop-player to 15
+		set score " " in sidebar of loop-player to 14
+		set score "&fMatou: &a%{kills.%loop-player%}+0%" in sidebar of loop-player to 12
+		set score "&fMorreu: &a%{deaths.%loop-player%}+0%" in sidebar of loop-player to 11
+		set score "&fVenceu: &a%{wins.%loop-player%}+0%" in sidebar of loop-player to 10
+		set score "&fJogou: &a%{played.%loop-player%}+0%" in sidebar of loop-player to 9
+		set score "  " in sidebar of loop-player to 8
+		set score "&fKDR: &a%{kills.%loop-player%}/{deaths.%loop-player%}+0%" in sidebar of loop-player to 7
+		set score "   " in sidebar of loop-player to 6
+		set score "&fCoins: &a%loop-player's balance%" in sidebar of loop-player to 5
+		set score "    " in sidebar of loop-player to 4
+		set score "&ehiperland.ga" in sidebar of loop-player to 3
+
+on rightclick:
+	if {ingame.%player%} is true:
+		set {_p} to 0
+		set {_f} to 0
+		if {%{minigame.%player%}%.iniciou} is "iniciando":
+			set {_f} to 1
+		else if {%{minigame.%player%}%.iniciou} is not set:
+			set {_f} to 1
+		if {_f} = 1:
+			loop {%{minigame.%player%}%.jogadores::*}:
+				if "%loop-value%" is "%player%":
+					set {_p} to 1
+			if {_p} = 1:
+				if player is holding chest named "&9&oKits":
+					wait 1 tick
+					open chest with 6 rows named "Kits" to player
+					wait 1 tick
+					set {_slot} to 0
+					loop 9 times:
+						format slot {_slot} of player with red glass named "" with lore "" to close
+						set {_slot} to {_slot}+1
+					set {_slot} to 45
+					loop 9 times:
+						format slot {_slot} of player with red glass named "" with lore "" to close
+						set {_slot} to {_slot}+1
+					set {_slot} to 9
+					loop {hiperland.freekits::*}:
+						set {_contains} to "%{hiperland.kit.%loop-value%::*}%"
+						replace all ", " with "||" in {_contains}
+						replace all " and " with "||" in {_contains}
+						format slot {_slot} of player with "%first element of {hiperland.kit.%loop-value%::*}%" parsed as item named "&e%loop-value%" with lore "&7Kit %loop-value%||%{_contains}%" to close then run "sudo %player% setkit %loop-value%"
+						set {_slot} to {_slot}+1
+					loop {hiperland.vipkits::*}:
+						set {_contains} to "%{hiperland.kit.%loop-value%::*}%"
+						replace all ", " with "||" in {_contains}
+						replace all " and " with "||" in {_contains}
+						format slot {_slot} of player with "%first element of {hiperland.kit.%loop-value%::*}%" parsed as item named "&e%loop-value%" with lore "&7Kit %loop-value%||%{_contains}%" to close then run "sudo %player% setkit %loop-value%"
+						set {_slot} to {_slot}+1
+					stop
+				if player is holding player head named "&c&oPerfil":
+					make player execute "profile"
+					stop
+				if player is holding ender chest named "&5&oLoja":
+					wait 1 tick
+					open chest with 6 rows named "Loja de Kits" to player
+					wait 1 tick
+					set {_slot} to 0
+					loop 9 times:
+						format slot {_slot} of player with red glass named "" with lore "" to close
+						set {_slot} to {_slot}+1
+					set {_slot} to 45
+					loop 9 times:
+						format slot {_slot} of player with red glass named "" with lore "" to close
+						set {_slot} to {_slot}+1
+					set {_slot} to 9
+					loop {hiperland.vipkits::*}:
+						set {_t} to 0
+						if player has permission "kit.%loop-value%":
+							set {_t} to 1
+						if {_t} = 0:
+							set {_contains} to "%{hiperland.kit.%loop-value%::*}%"
+							replace all ", " with "||" in {_contains}
+							replace all " and " with "||" in {_contains}
+							format slot {_slot} of player with "%first element of {hiperland.kit.%loop-value%::*}%" parsed as item named "&e%loop-value%" with lore "&7Kit %loop-value%||%{_contains}%||&fPreço: &a10.000" to close then run "sudo %player% buykit %loop-value%"
+							set {_slot} to {_slot}+1
+					stop
+
+command /buykit <text>:
+	trigger:
+		if player has permission "kit.%arg 1%":
+			send "&9Skywars> &cVocê já tem este kit."
+			stop
+		else:
+			set {_t} to 0
+			if player's balance = 10000:
+				set {_t} to 1
+			else if player's balance > 10000:
+				set {_t} to 1
+			if {_t} = 1:
+				set {_v} to 0
+				loop {hiperland.vipkits::*}:
+					if "%loop-value%" is "%arg 1%":
+						set {_v} to 1
+						set {_kit} to "%loop-value%"
+				if {_v} = 1:
+					remove 10000 from player's balance
+					set {_m} to 0
+					if player's balance = 0:
+						set {_m} to 1
+					else if player's balance > 0:
+						set {_m} to 1
+					if {_m} = 1:
+						execute console command "pex user %player% add kit.%{_kit}%"
+						send "&9Skywars> &aKit comprado com sucesso: %{_kit}%"
+						make player execute "setkit %{_kit}%"
+					else:
+						send "&9Skywars> &cOcorreu um problema com o seu money. Fale com um administrador sobre isso."
+				else:
+					send "&9Skywars> &cEste kit não existe."
+			else:
+				send "&9Skywars> &eVocê precisa de %10000-player's balance% coins para comprar este kit."
+
+
+
+command /sudo <player> <text>:
+	permission: admin.admin
+	executable by: players and console
+	trigger:
+		make arg 1 execute "%arg 2%"
+
+on join:
+	set tab header to "\n    &c&m-&6&m-&e&m-&a&m-&b&m-&r &b&lHIPERLAND&r &b&m-&a&m-&e&m-&6&m-&c&m-&r    \n" and footer to "\n&c&lSTORE.HIPERLAND.GA\n&6&l*\n&e&lHIPERLAND.GA\n" for player
+	set {_prefix} to "%2 first characters of coloured player's prefix%"
+	replace all "<none>" with "" in {_prefix}
+	set the player's tablist name to "&7%{_prefix}%%player%"
+
+command /su <text>:
+	permission: admin.admin
+	trigger:
+		execute console command "%arg 1%"
+
+on command:
+	if "%command%" is "stats":
+		cancel event
+		set {_arguments} to "%arguments%"
+		replace all "<none>" with "" in {_arguments}
+		make player execute "profile %{_arguments}%"
+
+command /profile [<player>]:
+	trigger:
+		if arg 1 is set:
+			set {_player} to arg 1
+		else:
+			set {_player} to player
+		send "&9Skywars> Stats de %{_player}%"
+		send "&fMatou: &a%{kills.%{_player}%}%"
+		send "&fMorreu: &a%{deaths.%{_player}%}%"
+		send "&fVenceu: &a%{wins.%{_player}%}%"
+		send "&fJogou: &a%{played.%{_player}%}%"
+		send "&fKDR: &a%{kills.%{_player}%}/{deaths.%{_player}%}%"
+		send "&fCoins: &a%{_player}'s balance%"
+		wait 1 tick
+		open chest with 3 rows named "Stats de %{_player}%" to player
+		wait 1 tick
+		set {_slot} to 0
+		loop 9 times:
+			format slot {_slot} of player with red glass named "" with lore "" to close
+			set {_slot} to {_slot}+1
+		set {_slot} to 18
+		loop 9 times:
+			format slot {_slot} of player with red glass named "" with lore "" to close
+			set {_slot} to {_slot}+1
+		format slot 9 of player with light green glass named "" with lore "" to close
+
+		if {kills.%{_player}%} < 1:
+			format slot 10 of player with diamond sword named "&fMATOU: &a%{kills.%{_player}%}%" with lore "" to close
+		else:
+			format slot 10 of player with "%{kills.%{_player}%}% diamond sword" parsed as item named "&fMATOU: &a%{kills.%{_player}%}%" with lore "" to close
+
+		if {deaths.%{_player}%} < 1:
+			format slot 11 of player with redstone named "&fMORREU: &a%{deaths.%{_player}%}%" with lore "" to close
+		else:
+			format slot 11 of player with "%{deaths.%{_player}%}% redstone" parsed as item named "&fMORREU: &a%{deaths.%{_player}%}%" with lore "" to close
+
+		format slot 12 of player with light green glass named "" with lore "" to close
+
+		if {wins.%{_player}%} < 1:
+			format slot 13 of player with diamond named "&fVENCEU: &a%{wins.%{_player}%}%" with lore "" to close
+		else:
+			format slot 13 of player with "%{wins.%{_player}%}% diamond" parsed as item named "&fVENCEU: &a%{wins.%{_player}%}%" with lore "" to close
+
+		if {played.%{_player}%} < 1:
+			format slot 14 of player with glass named "&fJOGOU: &a%{played.%{_player}%}%" with lore "" to close
+		else:
+			format slot 14 of player with "%{played.%{_player}%}% glass" parsed as item named "&fJOGOU: &a%{played.%{_player}%}%" with lore "" to close
+
+		format slot 15 of player with light green glass named "" with lore "" to close
+
+		format slot 16 of player with bottle o' enchanting named "&fKDR: &a%{kills.%{_player}%}/{deaths.%{_player}%}%" with lore "" to close
+
+		format slot 17 of player with light green glass named "" with lore "" to close
+
+command /loja:
+	trigger:
+		send "&cFunção ainda não implementada."
+
+command /arena [<text>]:
+	aliases: /sw, /skywars, /mg, /minigame
+	trigger:
+		if {minigame.%player%} is set:
+			if arg 1 is set:
+				set {_arg} to "%arg 1%"
+			else:
+				set {_arg} to ""
+			make player execute "%{minigame.%player%}%%{_arg}%" 
+
+on rightclick on sign:
+	if "%player's world%" is "{@lobby-world}":
+		line 1 of event-block contains "[ENTRAR]" or "[SW]"
+		line 2 of event-block contains "SOLO" or "GLOBAL"
+		line 3 of event-block contains "Na Fila" or ""
+		line 4 of event-block contains "SkyWars" or ""
+		make player execute "autojoin"
+		wait 1 second
+		set {_all} to number of all players
+		set {_lobby} to number of all players in "{@lobby-world}"
+		set line 1 of event-block to "&a[ENTRAR]"
+		set line 2 of event-block to "&0&lSOLO"
+		set line 3 of event-block to "%{_all}-{_lobby}% Jogando"
+		set line 4 of event-block to "&1SkyWars"
+		
